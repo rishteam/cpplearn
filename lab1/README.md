@@ -39,3 +39,11 @@ int main()
 Pair(1, 1)
 Pair(2, 2)
 ```
+
+## Testing
+
+* 執行測試
+
+```
+$ make test
+```
