@@ -35,31 +35,19 @@ class mylist
 {
 public:
     typedef mylist_iterator<T> iterator;
-    typedef size_type size_t;
+    typedef size_t size_type;
 
 public:
-    mylist()
-    {
-    }
+    mylist() = default;
     ~mylist()
     {
         delete head;
     }
 
     bool empty() const { return head == nullptr; }
-    size_type size() const { return size; }
-    void push_back(const T& elem)
-    {
-        std::cout << "Push back:" << elem << '\n';
-        mylist_node<T> *newNode = new mylist_node<T>(elem, nullptr);
-        // if head is nullptr (first push_back)
-        if (!head)
-            head = newNode;
-        else
-            tail->next = newNode; // Add the new node to previous tail
-        // Set tail as the new node
-        tail = newNode;
-    }
+    size_type size() const { return m_size; }
+    void push_back(const T& elem);
+    void pop_front();
 
     iterator begin()
     {
@@ -70,12 +58,46 @@ public:
         return iterator(nullptr);
     }
 
-private:
+public:
     // head and tail pointers of a linked-list
     mylist_node<T> *head = nullptr, *tail = nullptr;
     // size
-    size_type size = 0;
+    size_type m_size = 0;
 };
+
+template <typename T>
+void mylist<T>::push_back(const T &elem)
+{
+    mylist_node<T> *newNode = new mylist_node<T>(elem, nullptr);
+    // if head is nullptr (first push_back)
+    if (!head)
+        head = newNode;
+    else
+        tail->next = newNode; // Add the new node to original tail (before add a new node)
+    // Set tail as the new node
+    tail = newNode;
+    // Update the size counter
+    m_size++;
+}
+
+template <typename T>
+void mylist<T>::pop_front()
+{
+    if(!head) return;
+    // The order is important
+    mylist_node<T> *del = head;
+    head = head->next;   // maintain head pointer
+    del->next = nullptr; // delete del only
+    //
+    if(!head)
+        tail = nullptr;
+    //
+    delete del;
+    m_size--;
+}
+
+//========================================================================
+// mylist_iterator
 
 template<typename T>
 class mylist_iterator
@@ -112,9 +134,13 @@ public:
     {
         return ptr != other.ptr;
     }
+    bool operator==(const self_type& other) const
+    {
+        return !(ptr != other.ptr);
+    }
 
 private:
-    mylist_node<T> *ptr;
+    mylist_node<T> *ptr = nullptr;
     // ctor
     mylist_iterator(mylist_node<T> *ptr_) :
         ptr(ptr_)
