@@ -2,16 +2,23 @@
 #include "mylist.h" 
 using namespace std;
 
+#define NEW_VERBOSE 0
+#define DELETE_VERBOSE 1
+
 // Overload new and delete operator globally
 void* operator new(size_t size)
 {
-    // std::cout << "> Alloc " << size << " bytes" << '\n';
+#if NEW_VERBOSE
+    std::cout << "> Alloc " << size << " bytes" << '\n';
+#endif
     return malloc(size);
 }
 
 void operator delete(void *ptr, size_t size)
 {
-    // std::cout << "> Deleted " << ptr << " (" << size << " bytes)" << '\n';
+#if DELETE_VERBOSE
+    std::cout << "> Deleted " << ptr << " (" << size << " bytes)" << '\n';
+#endif
     free(ptr);
 }
 
@@ -62,6 +69,7 @@ ostream& operator<<(ostream &o, const foo &f)
 
 int main()
 {
+#if 0
     puts("Test for initializer_list ctor");
     {
         // 這三種初始化方式都是可以接受的
@@ -73,7 +81,9 @@ int main()
             printf("%d ", i);
         puts("");
     }
+#endif
     //
+#if 0
     puts("\nTest for copy ctor");
     {
         mylist<int> tmp = {1, 2, 3};
@@ -86,7 +96,9 @@ int main()
         printListPtr(tmp, "tmp");
         printListPtr(aa, "aa");
     }
+#endif
     //
+#if 0
     puts("\nTest for assignment operator");
     {
         mylist<int> copy;
@@ -99,8 +111,10 @@ int main()
             printf("%d ", i);
         puts("");
     }
+#endif
     //
-    puts("\nTest for push_back() and pop_front()");
+#if 1
+    puts("\nTest for push_back() and pop_back()");
     {
         mylist<std::string> li;
         li.push_back("fuck");
@@ -110,16 +124,16 @@ int main()
         li.push_back("too");
         printListPtr(li, "li");
 
-        li.pop_front();
-
-        for(mylist<string>::iterator it = li.begin();
-            it != li.end();
-            it++)
+        for(int i = 0; i < 3; i++)
         {
-            cout << *it << '\n';
+            li.pop_back();
+            printListPtr(li, "li");
+            printList(li);
         }
     }
+#endif
     //
+#if 0
     puts("\nTest for custom object");
     {
         mylist<foo> fooList;
@@ -135,4 +149,5 @@ int main()
         cout << "Front= " << fooList.front() << '\n';
         cout << "Back=  " << fooList.back() << '\n';
     }
+#endif
 }

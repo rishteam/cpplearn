@@ -21,9 +21,10 @@ class mylist_node
     // only can call by friend
 private:
     // ctor and dtor
-    mylist_node(const T& t, mylist_node<T> *next)
+    mylist_node(const T& t, mylist_node<T> *next=nullptr, mylist_node<T> *prev=nullptr)
     :   elem(t),
-        next(next)
+        next(next),
+        prev(prev)
     {
     }
     ~mylist_node()
@@ -32,7 +33,8 @@ private:
     }
     // data
     T elem;   // actual stored data
-    mylist_node<T> *next; // pointer to next elem
+    mylist_node<T> *next=nullptr; // pointer to next elem
+    mylist_node<T> *prev=nullptr; // pointer to previous elem
 };
 
 //========================================================================
@@ -76,7 +78,10 @@ public:
 
     // Modifiers
     void push_back(const T& elem);
+    void push_front(const T& elem);
+    void pop_back();
     void pop_front();
+    //
     void clear() { delete head; head = tail = nullptr; m_size = 0; }
 
     // Element access
@@ -119,18 +124,48 @@ mylist<T>::mylist(std::initializer_list<T> list)
 }
 
 template <typename T>
-void mylist<T>::push_back(const T &elem)
+void mylist<T>::push_back(const T& elem)
 {
-    mylist_node<T> *newNode = new mylist_node<T>(elem, nullptr);
-    // if head is nullptr (first push_back)
-    if (!head)
-        head = newNode;
+    mylist_node<T> *newNode = new mylist_node<T>(elem, nullptr, tail);
+    if(!tail)
+        head = tail = newNode;
     else
-        tail->next = newNode; // Add the new node to original tail (before add a new node)
-    // Set tail as the new node
-    tail = newNode;
+    {
+        tail->next = newNode;
+        tail = newNode;
+    }
     // Update the size counter
     m_size++;
+}
+
+template<typename T>
+void mylist<T>::push_front(const T& elem)
+{
+    // mylist_node<T> *newNode = new mylist_node<T>(elem, nullptr);
+    // // if head is nullptr (first push_back)
+    // if (!head)
+    //     head = newNode;
+
+}
+
+template<typename T>
+void mylist<T>::pop_back()
+{
+    if(!tail) return;
+    //
+    mylist_node<T> *del = tail;
+    // if tail have previous node
+    if(tail->prev)
+    {
+        tail = tail->prev;
+        tail->next = nullptr;
+    }
+    else // if only one node
+        head = tail = nullptr;
+    // delete the node
+    del->next = del->prev = nullptr;
+    delete del;
+    m_size--;
 }
 
 template <typename T>
