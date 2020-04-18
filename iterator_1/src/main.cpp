@@ -5,19 +5,20 @@ using namespace std;
 // Overload new and delete operator globally
 void* operator new(size_t size)
 {
-    std::cout << "> Alloc " << size << " bytes" << '\n';
+    // std::cout << "> Alloc " << size << " bytes" << '\n';
     return malloc(size);
 }
 
 void operator delete(void *ptr, size_t size)
 {
-    std::cout << "> Deleted " << ptr << " (" << size << " bytes)" << '\n';
+    // std::cout << "> Deleted " << ptr << " (" << size << " bytes)" << '\n';
     free(ptr);
 }
 
 template<typename T>
-void printList(mylist<T> &list)
+void printListPtr(mylist<T> &list, const string &name)
 {
+    cout << "mem of " << name << ": ";
     mylist_iterator h = list.begin(), e = list.end();
     while(h != e)
     {
@@ -25,7 +26,15 @@ void printList(mylist<T> &list)
         printf("%#p", h);
         h++;
     }
-    printf(" -> nullptr\nsize=%d\n", list.size());
+    printf(" -> nullptr (size=%d)\n", list.size());
+}
+
+template<typename T>
+void printList(mylist<T> &list)
+{
+    for(auto &i : list)
+        cout << i << ' ';
+    puts("");
 }
 
 // Custom object test
@@ -53,14 +62,53 @@ ostream& operator<<(ostream &o, const foo &f)
 
 int main()
 {
+    puts("Test for initializer_list ctor");
+    {
+        // 這三種初始化方式都是可以接受的
+        mylist<int> a = {1, 2, 3, 4};
+        mylist<int> b({1, 2, 3, 4});
+        mylist<int> c{1, 2, 3, 4};    // since c++11 uniform initialization
+        
+        for(auto &i : a)
+            printf("%d ", i);
+        puts("");
+    }
+    //
+    puts("\nTest for copy ctor");
+    {
+        mylist<int> tmp = {1, 2, 3};
+        // 這兩種初始化方式都是可以接受的
+        // 都會呼叫 mylist<T>::mylist(std::initializer_list<T> list)
+        mylist<int> aa(tmp);
+        mylist<int> bb = tmp;
+
+        printList(aa);
+        printListPtr(tmp, "tmp");
+        printListPtr(aa, "aa");
+    }
+    //
+    puts("\nTest for assignment operator");
+    {
+        mylist<int> copy;
+        {
+            mylist<int> tmp = {1, 2, 3};
+            copy = tmp;
+        }
+
+        for(auto &i : copy)
+            printf("%d ", i);
+        puts("");
+    }
+    //
+    puts("\nTest for push_back() and pop_front()");
     {
         mylist<std::string> li;
         li.push_back("fuck");
-        printList<string>(li);
+        printListPtr(li, "li");
         li.push_back("you");
-        printList<string>(li);
+        printListPtr(li, "li");
         li.push_back("too");
-        printList<string>(li);
+        printListPtr(li, "li");
 
         li.pop_front();
 
@@ -71,15 +119,13 @@ int main()
             cout << *it << '\n';
         }
     }
-
-    for(int i = 0; i < 30; i++, putchar('-'));
-    puts("");
-
+    //
+    puts("\nTest for custom object");
     {
         mylist<foo> fooList;
         fooList.push_back(foo());
         fooList.push_back(foo(123, 1.23, "roy4801"));
-        printList(fooList);
+        printListPtr(fooList, "fooList");
 
         for(auto it = fooList.begin(); it != fooList.end(); it++)
             printf("%d %f %s\n", it->a, it->b, it->c);
@@ -89,13 +135,4 @@ int main()
         cout << "Front= " << fooList.front() << '\n';
         cout << "Back=  " << fooList.back() << '\n';
     }
-
-    // auto b = li.begin();
-    // auto e = li.end();
-
-    // while(b != e)
-    // {
-    //     cout << *b << '\n';
-    //     b++;
-    // }
 }
