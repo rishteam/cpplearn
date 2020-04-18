@@ -25,30 +25,70 @@ void printList(mylist<T> &list)
         printf("%#p", h);
         h++;
     }
-    printf(" -> nullptr\n");
+    printf(" -> nullptr\nsize=%d\n", list.size());
+}
+
+// Custom object test
+struct foo
+{
+    int a = 87;
+    float b = 8.7;
+    char c[30] = "fuck you";
+
+    foo() = default;
+    foo(int a_, float b_, const char c_[])
+    {
+        a = a_;
+        b = b_;
+        strncpy(c, c_, 30);
+    }
+
+    friend ostream &operator<<(ostream &o, const foo &f);
+};
+
+ostream& operator<<(ostream &o, const foo &f)
+{
+    return o << f.a << ' ' << f.b << ' ' << std::string(f.c);
 }
 
 int main()
 {
-    mylist<std::string> li;
-    li.push_back("fuck");
-    printList<string>(li);
-    li.push_back("you");
-    printList<string>(li);
-    li.push_back("too");
-    printList<string>(li);
+    {
+        mylist<std::string> li;
+        li.push_back("fuck");
+        printList<string>(li);
+        li.push_back("you");
+        printList<string>(li);
+        li.push_back("too");
+        printList<string>(li);
 
-    printf("size=%d\n", li.size());
-    
-    for (auto &i : li)
-        cout << i << '\n';
-    
-    li.pop_front();
-    printList<string>(li);
-    printf("size=%d\n", li.size());
+        li.pop_front();
 
-    for (auto &i : li)
-        cout << i << '\n';
+        for(mylist<string>::iterator it = li.begin();
+            it != li.end();
+            it++)
+        {
+            cout << *it << '\n';
+        }
+    }
+
+    for(int i = 0; i < 30; i++, putchar('-'));
+    puts("");
+
+    {
+        mylist<foo> fooList;
+        fooList.push_back(foo());
+        fooList.push_back(foo(123, 1.23, "roy4801"));
+        printList(fooList);
+
+        for(auto it = fooList.begin(); it != fooList.end(); it++)
+            printf("%d %f %s\n", it->a, it->b, it->c);
+
+        fooList.pop_front();
+
+        cout << "Front= " << fooList.front() << '\n';
+        cout << "Back=  " << fooList.back() << '\n';
+    }
 
     // auto b = li.begin();
     // auto e = li.end();

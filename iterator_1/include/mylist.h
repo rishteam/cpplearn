@@ -9,13 +9,17 @@
 template <typename T> class mylist;
 template <typename T> class mylist_iterator;
 
+//========================================================================
+// mylist_node: a wrapper for store the actuall data and pointer
+//
 template<typename T>
 class mylist_node
 {
     friend class mylist<T>;
     friend class mylist_iterator<T>;
+    // only can call by friend
 private:
-    // ctor and dtor (only can call by mylist*<T>)
+    // ctor and dtor
     mylist_node(const T& t, mylist_node<T> *next)
     :   elem(t),
         next(next)
@@ -30,25 +34,39 @@ private:
     mylist_node<T> *next; // pointer to next elem
 };
 
+//========================================================================
+// mylist: a single linked list that imitating std::forward_list
+//
 template<typename T>
 class mylist
 {
 public:
+    typedef T value_type;
+    typedef T& reference;
+    typedef T* pointer;
     typedef mylist_iterator<T> iterator;
     typedef size_t size_type;
 
-public:
+    // ctor and dtor
     mylist() = default;
     ~mylist()
     {
         delete head;
     }
 
+    // Capacity
     bool empty() const { return head == nullptr; }
     size_type size() const { return m_size; }
+
+    // Modifiers
     void push_back(const T& elem);
     void pop_front();
 
+    // Element access
+    reference front() { return head->elem; }
+    reference back() { return tail->elem; }
+
+    // Iterators
     iterator begin()
     {
         return iterator(head);
@@ -58,7 +76,7 @@ public:
         return iterator(nullptr);
     }
 
-public:
+private:
     // head and tail pointers of a linked-list
     mylist_node<T> *head = nullptr, *tail = nullptr;
     // size
@@ -97,13 +115,12 @@ void mylist<T>::pop_front()
 }
 
 //========================================================================
-// mylist_iterator
-
+// mylist_iterator: a iterator wrapper for mylist_node
+//
 template<typename T>
 class mylist_iterator
 {
     friend class mylist<T>;
-
 public:
     typedef mylist_iterator<T> self_type;
     typedef T value_type;
@@ -112,10 +129,13 @@ public:
     typedef std::forward_iterator_tag iterator_category;
     typedef size_t difference_type;
 
-public:
     reference operator*()
     {
         return ptr->elem;
+    }
+    pointer operator->()
+    {
+        return &(ptr->elem);
     }
     const self_type& operator++() // prefix
     {
