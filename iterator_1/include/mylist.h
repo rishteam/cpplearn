@@ -29,6 +29,7 @@ private:
     }
     ~mylist_node()
     {
+        // printf("Destruct mylist_node: %p\n", this);
         delete next;
     }
     // data
@@ -56,6 +57,7 @@ public:
     mylist() = default;
     ~mylist()
     {
+        // printf("Destruct mylist\n");
         delete head;
     }
     // Copy ctor
@@ -126,7 +128,10 @@ mylist<T>::mylist(std::initializer_list<T> list)
 template <typename T>
 void mylist<T>::push_back(const T& elem)
 {
+    puts("push_back");
+    //
     mylist_node<T> *newNode = new mylist_node<T>(elem, nullptr, tail);
+    // if it's first node
     if(!tail)
         head = tail = newNode;
     else
@@ -141,16 +146,26 @@ void mylist<T>::push_back(const T& elem)
 template<typename T>
 void mylist<T>::push_front(const T& elem)
 {
-    // mylist_node<T> *newNode = new mylist_node<T>(elem, nullptr);
-    // // if head is nullptr (first push_back)
-    // if (!head)
-    //     head = newNode;
-
+    puts("push_front");
+    //
+    mylist_node<T> *newNode = new mylist_node<T>(elem, head, nullptr);
+    // if it's first node
+    if(!head)
+        head = tail = newNode;
+    else
+    {
+        head->prev = newNode;
+        head = newNode;
+    }
+    // Update the size counter
+    m_size++;
 }
 
 template<typename T>
 void mylist<T>::pop_back()
 {
+    puts("pop_back");
+    //
     if(!tail) return;
     //
     mylist_node<T> *del = tail;
@@ -171,15 +186,21 @@ void mylist<T>::pop_back()
 template <typename T>
 void mylist<T>::pop_front()
 {
+    puts("pop_front");
+    //
     if(!head) return;
-    // The order is important
+    //
     mylist_node<T> *del = head;
-    head = head->next;   // maintain head pointer
-    del->next = nullptr; // delete del only
-    //
-    if(!head)
-        tail = nullptr;
-    //
+    // if head have next node
+    if(head->next)
+    {
+        head = head->next;
+        head->prev = nullptr;
+    }
+    else // if only one node
+        head = tail = nullptr;
+    // delete the node
+    del->next = del->prev = nullptr;
     delete del;
     m_size--;
 }
@@ -227,6 +248,11 @@ public:
     bool operator==(const self_type& other) const
     {
         return !(ptr != other.ptr);
+    }
+
+    pointer getPtr() const
+    {
+        return &(ptr->elem);
     }
 
 private:
